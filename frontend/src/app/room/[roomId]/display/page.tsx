@@ -1,6 +1,6 @@
 "use client";
 import { QRCodeSVG } from "qrcode.react";
-import { useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import style from "./page.module.css";
 import useRoomJoin from "@/hooks/useRoomJoin";
@@ -10,6 +10,8 @@ export default function QRCodePage() {
   const param = useParams();
   const roomId = param.roomId as string | undefined;
   const { messages } = useRoomJoin(roomId ?? "");
+
+  const [currentGame, setCurrentGame] = useState<string>("millstone"); // デフォルトのゲーム
 
   const isDarkmode = useMemo(
     () => window.matchMedia("(prefers-color-scheme: dark)").matches,
@@ -22,10 +24,33 @@ export default function QRCodePage() {
 
   const isControllerConnected = messages.includes("controller connected");
 
+  // メッセージを監視してゲームを切り替える
+  useEffect(() => {
+    if (messages.includes("anotherGame") && currentGame !== "anotherGame") {
+      setCurrentGame("anotherGame");
+    } else if (
+      messages.includes("millstoneGame") &&
+      currentGame !== "millstone"
+    ) {
+      setCurrentGame("millstone");
+    }
+  }, [messages, currentGame]); // `messages` の変化を監視
+
+  const renderGame = () => {
+    switch (currentGame) {
+      case "millstone":
+        return <MillstoneGame messages={messages} />;
+      case "anotherGame":
+        return <h3>別のゲーム</h3>;
+      default:
+        return <h3>ゲームの選択肢が見つかりません。</h3>;
+    }
+  };
+
   return (
     <div className={style["qrcode-page-wrapper"]}>
       {isControllerConnected ? (
-        <MillstoneGame messages={messages} />
+        renderGame() // 現在遊んでいるゲームを表示
       ) : (
         <>
           <h1>スマホでこのQRコードを読み込んでね!</h1>

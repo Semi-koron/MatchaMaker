@@ -46,13 +46,23 @@ func sendMessage(roomID string, msg []byte) {
 	}
 }
 
+func nextGame(roomID string, game string) {
+	sendMessage(roomID, []byte(game))
+	timeup(roomID)
+}
+
 func timeup(roomID string) {
 	// 30秒後にtimeupを送信
 	fmt.Println("test")
 	time.AfterFunc(30*time.Second, func() {
 		sendMessage(roomID, []byte("finish"))
+		time.AfterFunc(5*time.Second, func() {
+			nextGame(roomID, "anotherGame")
+		})
 	})
 }
+
+
 
 // クライアントの WebSocket 接続を処理
 func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
