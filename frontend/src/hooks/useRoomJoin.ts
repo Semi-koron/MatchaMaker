@@ -60,7 +60,12 @@ const useRoomJoin = (roomId: string) => {
     }
   };
 
-  return { messages, sendMessage, isConnected };
+  // メッセージのクリア
+  const clearMessages = () => {
+    setMessages(["controller connected"]);
+  };
+
+  return { messages, sendMessage, clearMessages, isConnected };
 };
 
 export default useRoomJoin;

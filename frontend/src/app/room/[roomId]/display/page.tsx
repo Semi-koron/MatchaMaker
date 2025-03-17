@@ -5,13 +5,14 @@ import { useParams } from "next/navigation";
 import style from "./page.module.css";
 import useRoomJoin from "@/hooks/useRoomJoin";
 import MillstoneGame from "@/components/game/millstone/MillstoneGame";
+import PluckTeaGame from "@/components/game/pluckTea/PluckTeaGame";
 
 export default function QRCodePage() {
   const param = useParams();
   const roomId = param.roomId as string | undefined;
-  const { messages } = useRoomJoin(roomId ?? "");
+  const { messages, clearMessages, sendMessage } = useRoomJoin(roomId ?? "");
 
-  const [currentGame, setCurrentGame] = useState<string>("millstone"); // デフォルトのゲーム
+  const [currentGame, setCurrentGame] = useState<string>("pluckTeaGame"); // デフォルトのゲーム
 
   const isDarkmode = useMemo(
     () => window.matchMedia("(prefers-color-scheme: dark)").matches,
@@ -26,22 +27,29 @@ export default function QRCodePage() {
 
   // メッセージを監視してゲームを切り替える
   useEffect(() => {
-    if (messages.includes("anotherGame") && currentGame !== "anotherGame") {
-      setCurrentGame("anotherGame");
-    } else if (
-      messages.includes("millstoneGame") &&
-      currentGame !== "millstone"
-    ) {
-      setCurrentGame("millstone");
+    switch (messages[messages.length - 1]) {
+      case "pluckTeaGame":
+        if (currentGame !== "pluckTeaGame") {
+          setCurrentGame("pluckTeaGame");
+          clearMessages();
+        }
+        break;
+      case "millstoneGame":
+        if (currentGame !== "millstoneGame") {
+          setCurrentGame("millstoneGame");
+          clearMessages();
+          sendMessage("nextGame");
+        }
+        break;
     }
   }, [messages, currentGame]); // `messages` の変化を監視
 
   const renderGame = () => {
     switch (currentGame) {
-      case "millstone":
+      case "millstoneGame":
         return <MillstoneGame messages={messages} />;
-      case "anotherGame":
-        return <h3>別のゲーム</h3>;
+      case "pluckTeaGame":
+        return <PluckTeaGame messages={messages} />;
       default:
         return <h3>ゲームの選択肢が見つかりません。</h3>;
     }

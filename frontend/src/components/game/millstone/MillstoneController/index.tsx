@@ -4,14 +4,12 @@ import { useEffect, useState } from "react";
 type MillstoneControllerProps = {
   motion: { x: number; z: number } | null;
   messages: string[];
-  isConnected: boolean;
   sendMessage: (message: string) => void;
 };
 
 const MillstoneController = ({
   motion,
   messages,
-  isConnected,
   sendMessage,
 }: MillstoneControllerProps) => {
   const [millstoneAngle, setMillstoneAngle] = useState<number>(0); // 石臼の回転角度
@@ -51,11 +49,8 @@ const MillstoneController = ({
 
   // 定期的に millstoneAngle を送信する
   useEffect(() => {
-    if (!isConnected) {
-      return;
-    }
     sendMessage(millstoneAngle.toString());
-  }, [millstoneAngle, isConnected, sendMessage]);
+  }, [millstoneAngle, sendMessage]);
 
   return (
     <div>

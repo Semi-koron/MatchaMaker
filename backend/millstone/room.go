@@ -57,7 +57,25 @@ func timeup(roomID string) {
 	time.AfterFunc(30*time.Second, func() {
 		sendMessage(roomID, []byte("finish"))
 		time.AfterFunc(5*time.Second, func() {
-			nextGame(roomID, "anotherGame")
+			nextGame(roomID, "millstoneGame")
+		})
+	})
+}
+
+func setupGame (roomID string) {
+	sendMessage(roomID, []byte("controller connected"))
+	// 3...2...1...のカウントダウン
+	time.AfterFunc(time.Second, func() {
+		sendMessage(roomID, []byte("count3"))
+		time.AfterFunc(time.Second, func() {
+			sendMessage(roomID, []byte("count2"))
+			time.AfterFunc(time.Second, func() {
+				sendMessage(roomID, []byte("count1"))
+				time.AfterFunc(time.Second, func() {
+					sendMessage(roomID, []byte("start"))
+					timeup(roomID)
+				})
+			})
 		})
 	})
 }
@@ -89,28 +107,7 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Client connected to room: %s", roomID)
 	// 2人目が入室したら"controller connected"を送信
 	if len(rooms[roomID]) == 2 {
-		for client := range rooms[roomID] {
-			err := client.WriteMessage(websocket.TextMessage, []byte("controller connected"))
-			if err != nil {
-				log.Println("Write Error:", err)
-				client.Close()
-				delete(rooms[roomID], client)
-			}
-		}
-		// 3...2...1...のカウントダウン
-		time.AfterFunc(time.Second, func() {
-			sendMessage(roomID, []byte("count3"))
-			time.AfterFunc(time.Second, func() {
-				sendMessage(roomID, []byte("count2"))
-				time.AfterFunc(time.Second, func() {
-					sendMessage(roomID, []byte("count1"))
-					time.AfterFunc(time.Second, func() {
-						sendMessage(roomID, []byte("start"))
-						timeup(roomID)
-					})
-				})
-			})
-		})
+		setupGame(roomID)
 	}
 
 	// クライアントのメッセージを受け取るループ
@@ -121,7 +118,9 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 			delete(rooms[roomID], conn)
 			break
 		}
-
+		if string(msg) == "nextGame" {
+			setupGame(roomID)
+		}
 		// ルーム内の全クライアントにメッセージを送信
 		sendMessage(roomID, msg)
 	}
