@@ -13,7 +13,7 @@ export default function QRCodePage() {
   const [millstoneAngle, setMillstoneAngle] = useState<number>(0);
   const param = useParams();
   const roomId = param.roomId as string | undefined;
-  const { messages, isConnected } = useRoomJoin(roomId ?? "");
+  const { messages } = useRoomJoin(roomId ?? "");
 
   useEffect(() => {
     const isDarkmode = window.matchMedia("(prefers-color-scheme: dark)");

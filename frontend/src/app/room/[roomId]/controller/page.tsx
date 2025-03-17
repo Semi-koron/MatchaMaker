@@ -1,5 +1,5 @@
 "use client";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import useRoomJoin from "@/hooks/useRoomJoin";
 import useMotion from "@/hooks/useMotion";
