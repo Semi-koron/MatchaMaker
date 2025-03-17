@@ -11,7 +11,7 @@ export default function QRCodePage() {
   const [isDarkmode, setIsDarkmode] = useState<boolean>(false);
   const param = useParams();
   const roomId = param.roomId as string | undefined;
-  const { messages, sendMessage, isConnected } = useRoomJoin(roomId ?? "");
+  const { messages, isConnected } = useRoomJoin(roomId ?? "");
 
   useEffect(() => {
     const isDarkmode = window.matchMedia("(prefers-color-scheme: dark)");
