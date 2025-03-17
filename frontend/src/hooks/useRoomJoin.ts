@@ -10,7 +10,7 @@ const useRoomJoin = (roomId: string) => {
 
     // WebSocket の URL
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "localhost:8080";
-    const socket = new WebSocket(`ws://${baseUrl}/room/${roomId}`);
+    const socket = new WebSocket(`wss://${baseUrl}/room/${roomId}`);
     socketRef.current = socket;
 
     // 接続成功
