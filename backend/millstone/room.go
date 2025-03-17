@@ -21,7 +21,9 @@ var upgrader = websocket.Upgrader{
 			allowUrl = "http://localhost:3000"
 		}
 		// リクエスト元の URL が許可リストに含まれているか確認
-		if r.Header.Get("Origin") != allowUrl {
+		origin := r.Header.Get("Origin")
+		fmt.Println("Origin:", origin)
+		if origin != allowUrl {
 			log.Println("Origin not allowed:", r.Header.Get("Origin"))
 			return false
 		}
