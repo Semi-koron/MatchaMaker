@@ -2,6 +2,7 @@
 import { QRCodeSVG } from "qrcode.react";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Image from "next/image";
 import style from "./page.module.css";
 import useRoomJoin from "@/hooks/useRoomJoin";
 
@@ -9,6 +10,7 @@ export default function QRCodePage() {
   const [qrCode, setQRCode] = useState<string>("");
   const [linked, setLinked] = useState<boolean>(false);
   const [isDarkmode, setIsDarkmode] = useState<boolean>(false);
+  const [millstoneAngle, setMillstoneAngle] = useState<number>(0);
   const param = useParams();
   const roomId = param.roomId as string | undefined;
   const { messages, isConnected } = useRoomJoin(roomId ?? "");
@@ -26,13 +28,27 @@ export default function QRCodePage() {
     console.log("messages", messages);
     if (messages[messages.length - 1] === "controller connected") {
       setLinked(true);
+    } else {
+      const angle = parseFloat(messages[messages.length - 1]);
+      setMillstoneAngle(angle);
     }
   }, [messages]);
 
   return (
     <>
       {linked ? (
-        <h1>回せ！</h1>
+        <div className={style["qrcode-page-wrapper"]}>
+          <h1>回せ！</h1>
+          <Image
+            src="/millstone.svg"
+            alt="millstone"
+            width={256}
+            height={256}
+            style={{
+              transform: `rotate(${millstoneAngle}deg)`,
+            }}
+          />
+        </div>
       ) : (
         <>
           <div className={style["qrcode-page-wrapper"]}>
@@ -63,7 +79,6 @@ export default function QRCodePage() {
           </div>
         </>
       )}
-      <h4>接続状態: {isConnected ? "接続中" : "切断中"}</h4>
     </>
   );
 }

@@ -10,7 +10,8 @@ const useRoomJoin = (roomId: string) => {
 
     // WebSocket の URL
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "localhost:8080";
-    const socket = new WebSocket(`wss://${baseUrl}/room/${roomId}`);
+    const protocol = process.env.NEXT_PUBLIC_USE_SSL ? "ws" : "wss";
+    const socket = new WebSocket(`${protocol}://${baseUrl}/room/${roomId}`);
     socketRef.current = socket;
 
     // 接続成功
@@ -21,7 +22,7 @@ const useRoomJoin = (roomId: string) => {
 
     // メッセージ受信
     socket.onmessage = (event) => {
-      console.log("📩 Received:", event.data);
+      //   console.log("📩 Received:", event.data);
       setMessages((prev) => [...prev, event.data]);
     };
 
