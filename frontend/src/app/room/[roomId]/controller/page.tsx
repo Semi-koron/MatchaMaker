@@ -28,11 +28,10 @@ export default function ControllerPage() {
         if (currentGame !== "millstoneGame") {
           setCurrentGame("millstoneGame");
           clearMessages();
-          sendMessage("nextGame");
         }
         break;
     }
-  }, [messages, currentGame]); // `messages` の変化を監視
+  }, [messages, currentGame, clearMessages]); // `messages` の変化を監視
 
   const renderController = () => {
     switch (currentGame) {

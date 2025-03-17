@@ -7,7 +7,6 @@ type PluckTeaGameProps = {
 };
 
 export default function PluckTeaGame({ messages }: PluckTeaGameProps) {
-  const [millstoneAngle, setMillstoneAngle] = useState<number>(0);
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [count, setCount] = useState<number>(3);
   const xPleyerPositionRef = useRef(0);
@@ -42,6 +41,7 @@ export default function PluckTeaGame({ messages }: PluckTeaGameProps) {
         try {
           parsedMessage = JSON.parse(lastMessage);
         } catch (e) {
+          console.error(e);
           break;
         }
         const { dx, dy } = parsedMessage;

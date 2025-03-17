@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 type PluckTeaControllerProps = {
   orientation: { gamma: number; beta: number } | null;

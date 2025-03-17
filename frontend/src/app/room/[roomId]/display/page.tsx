@@ -42,7 +42,7 @@ export default function QRCodePage() {
         }
         break;
     }
-  }, [messages, currentGame]); // `messages` の変化を監視
+  }, [messages, currentGame, clearMessages, sendMessage]); // `messages` の変化を監視
 
   const renderGame = () => {
     switch (currentGame) {
