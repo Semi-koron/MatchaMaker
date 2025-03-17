@@ -1,0 +1,13 @@
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  padding: 10px 48px;
+  border-radius: 9999px;
+
+  background-color: var(--primary);
+  &:hover {
+    background-color: var(--secondary);
+  }
+}
