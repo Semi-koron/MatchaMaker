@@ -16,13 +16,13 @@ import (
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		allowUrl := os.Getenv("ALLOW_URL")
-		fmt.Println("ALLOW_URL:", allowUrl)
+		log.Println("ALLOW_URL:", allowUrl)
 		if allowUrl == "" {
 			allowUrl = "http://localhost:3000"
 		}
 		// リクエスト元の URL が許可リストに含まれているか確認
 		origin := r.Header.Get("Origin")
-		fmt.Println("Origin:", origin)
+		log.Println("Origin:", origin)
 		if origin != allowUrl {
 			log.Println("Origin not allowed:", r.Header.Get("Origin"))
 			return false
