@@ -16,6 +16,7 @@ import (
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		allowUrl := os.Getenv("ALLOW_URL")
+		fmt.Println("ALLOW_URL:", allowUrl)
 		if allowUrl == "" {
 			allowUrl = "http://localhost:3000"
 		}
