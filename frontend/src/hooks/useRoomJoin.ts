@@ -22,8 +22,15 @@ const useRoomJoin = (roomId: string) => {
 
     // メッセージ受信
     socket.onmessage = (event) => {
-      //   console.log("📩 Received:", event.data);
-      setMessages((prev) => [...prev, event.data]);
+      console.log("📩 Received:", event.data);
+      // メッセージが新しいものであれば状態を更新
+      setMessages((prev) => {
+        // メッセージが重複しないようにする処理
+        if (!prev.includes(event.data)) {
+          return [...prev, event.data];
+        }
+        return prev;
+      });
     };
 
     // エラー処理
@@ -42,7 +49,7 @@ const useRoomJoin = (roomId: string) => {
       console.log(`🔌 Disconnecting from room: ${roomId}`);
       socket.close();
     };
-  }, [roomId]);
+  }, [roomId]); // roomId が変更されるたびに WebSocket 接続を再作成
 
   // メッセージ送信
   const sendMessage = (message: string) => {

@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -34,9 +35,27 @@ var upgrader = websocket.Upgrader{
 // ルーム管理用のマップ
 var rooms = make(map[string]map[*websocket.Conn]bool)
 
+func sendMessage(roomID string, msg []byte) {
+	for client := range rooms[roomID] {
+		err := client.WriteMessage(websocket.TextMessage, msg)
+		if err != nil {
+			log.Println("Write Error:", err)
+			client.Close()
+			delete(rooms[roomID], client)
+		}
+	}
+}
+
+func timeup(roomID string) {
+	// 30秒後にtimeupを送信
+	fmt.Println("test")
+	time.AfterFunc(30*time.Second, func() {
+		sendMessage(roomID, []byte("finish"))
+	})
+}
+
 // クライアントの WebSocket 接続を処理
 func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("test")
 	vars := mux.Vars(r)
 	roomID := vars["roomID"]
 
@@ -52,8 +71,37 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	if rooms[roomID] == nil {
 		rooms[roomID] = make(map[*websocket.Conn]bool)
 	}
+	if len(rooms[roomID]) >= 2 {
+		log.Println("Room is full")
+		return
+	}
 	rooms[roomID][conn] = true
 	log.Printf("Client connected to room: %s", roomID)
+	// 2人目が入室したら"controller connected"を送信
+	if len(rooms[roomID]) == 2 {
+		for client := range rooms[roomID] {
+			err := client.WriteMessage(websocket.TextMessage, []byte("controller connected"))
+			if err != nil {
+				log.Println("Write Error:", err)
+				client.Close()
+				delete(rooms[roomID], client)
+			}
+		}
+		// 3...2...1...のカウントダウン
+		time.AfterFunc(time.Second, func() {
+			sendMessage(roomID, []byte("count3"))
+			time.AfterFunc(time.Second, func() {
+				sendMessage(roomID, []byte("count2"))
+				time.AfterFunc(time.Second, func() {
+					sendMessage(roomID, []byte("count1"))
+					time.AfterFunc(time.Second, func() {
+						sendMessage(roomID, []byte("start"))
+						timeup(roomID)
+					})
+				})
+			})
+		})
+	}
 
 	// クライアントのメッセージを受け取るループ
 	for {
@@ -65,14 +113,8 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// ルーム内の全クライアントにメッセージを送信
-		for client := range rooms[roomID] {
-			err := client.WriteMessage(websocket.TextMessage, msg)
-			if err != nil {
-				log.Println("Write Error:", err)
-				client.Close()
-				delete(rooms[roomID], client)
-			}
-		}
+		sendMessage(roomID, msg)
 	}
 }
+
 
