@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -14,6 +15,15 @@ import (
 // WebSocket のアップグレーダー
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
+		allowUrl := os.Getenv("ALLOW_URL")
+		if allowUrl == "" {
+			allowUrl = "http://localhost:3000"
+		}
+		// リクエスト元の URL が許可リストに含まれているか確認
+		if r.Header.Get("Origin") != allowUrl {
+			log.Println("Origin not allowed:", r.Header.Get("Origin"))
+			return false
+		}
 		return true
 	},
 }
