@@ -32,21 +32,21 @@ export default function QRCodePage() {
     switch (messages[messages.length - 1]) {
       case "pluckTeaGame":
         if (currentGame !== "pluckTeaGame") {
-          setCurrentGame("pluckTeaGame");
           clearMessages();
+          setCurrentGame("pluckTeaGame");
         }
         break;
       case "fermentationGame":
         if (currentGame !== "fermentationGame") {
-          setCurrentGame("fermentationGame");
           clearMessages();
+          setCurrentGame("fermentationGame");
           sendMessage("nextGame");
         }
         break;
       case "millstoneGame":
         if (currentGame !== "millstoneGame") {
-          setCurrentGame("millstoneGame");
           clearMessages();
+          setCurrentGame("millstoneGame");
           sendMessage("nextGame");
         }
         break;
