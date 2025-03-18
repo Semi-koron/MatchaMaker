@@ -12,13 +12,17 @@ const useOrientation = () => {
 
   useEffect(() => {
     const requestPermission = async () => {
+      // `requestPermission` が存在するかチェック
       if (
         typeof DeviceOrientationEvent !== "undefined" &&
-        (DeviceOrientationEvent as any).requestPermission
+        "requestPermission" in DeviceOrientationEvent
       ) {
         try {
+          // `requestPermission` を呼び出し、許可を求める
           const permission = await (
-            DeviceOrientationEvent as any
+            DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+              requestPermission: () => Promise<string>;
+            }
           ).requestPermission();
           setPermissionGranted(permission === "granted");
         } catch (error) {
@@ -26,7 +30,7 @@ const useOrientation = () => {
           setPermissionGranted(false);
         }
       } else {
-        // ブラウザが requestPermission() を必要としない場合
+        // `requestPermission` が不要な環境（Android など）
         setPermissionGranted(true);
       }
     };

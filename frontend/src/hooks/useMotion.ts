@@ -12,13 +12,17 @@ const useMotion = () => {
 
   useEffect(() => {
     const requestPermission = async () => {
+      // `requestPermission` が存在するかチェック
       if (
         typeof DeviceMotionEvent !== "undefined" &&
-        (DeviceMotionEvent as any).requestPermission
+        "requestPermission" in DeviceMotionEvent
       ) {
         try {
+          // `requestPermission` を呼び出し、許可を求める
           const permission = await (
-            DeviceMotionEvent as any
+            DeviceMotionEvent as typeof DeviceMotionEvent & {
+              requestPermission: () => Promise<string>;
+            }
           ).requestPermission();
           setPermissionGranted(permission === "granted");
         } catch (error) {
@@ -26,7 +30,7 @@ const useMotion = () => {
           setPermissionGranted(false);
         }
       } else {
-        // ブラウザが requestPermission() を必要としない場合
+        // `requestPermission` が不要な環境（Android など）
         setPermissionGranted(true);
       }
     };
