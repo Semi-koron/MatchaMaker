@@ -106,11 +106,10 @@ export default function PluckTeaGame({ messages }: PluckTeaGameProps) {
             }}
           />
           <Image
-            src="/tea.svg"
+            src={isDarkmode ? "/tea.svg" : "/tea_dark.svg"}
             alt="tea"
             width={100}
             height={100}
-            color={isDarkmode ? "#213b22" : "#e7ffde"}
             style={{
               position: "fixed",
               top: `${yTeaPositionRef.current}px`,
