@@ -148,6 +148,7 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 			for conn, name := range user[roomID] {
 				if name == userName {
 					score[roomID][conn] += scoreValue
+					fmt.Println("Score:", score[roomID][conn])
 				}
 			}
 
