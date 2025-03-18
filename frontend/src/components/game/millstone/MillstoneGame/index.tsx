@@ -62,6 +62,7 @@ export default function MillstoneGame({
         break;
       default:
         //メッセージが ユーザ名:メッセージ という形式の場合
+        if (isFinished) return;
         const { msg, index } = messagesProvider(lastMessage, playerName);
         if (index === -1) {
           break;
