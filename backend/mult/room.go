@@ -5,11 +5,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
+var writeMutex sync.Mutex
 
 // WebSocket のアップグレーダー
 var upgrader = websocket.Upgrader{
@@ -32,32 +34,36 @@ var currentGame = make(map[string]string)
 
 // ホストのみにメッセージを送信
 func sendMessageHost(roomID string, msg []byte) {
-	host, exists := roomHost[roomID]
-	if exists {
-		err := host.WriteMessage(websocket.TextMessage, msg)
-		if err != nil {
-			log.Println("Write Error to Host:", err)
-			host.Close()
-			delete(roomHost, roomID)
-		}
-	}
+    host, exists := roomHost[roomID]
+    if exists {
+        writeMutex.Lock()  // ロック
+        defer writeMutex.Unlock()  // 解放
+        err := host.WriteMessage(websocket.TextMessage, msg)
+        if err != nil {
+            log.Println("Write Error to Host:", err)
+            host.Close()
+            delete(roomHost, roomID)
+        }
+    }
 }
 
 // ルーム内の全員にメッセージを送信
 func sendMessageAll(roomID string, msg []byte) {
-	for client := range rooms[roomID] {
-		err := client.WriteMessage(websocket.TextMessage, msg)
-		if err != nil {
-			log.Println("Write Error:", err)
-			client.Close()
-			delete(rooms[roomID], client)
-		}
-	}
+    writeMutex.Lock()
+    defer writeMutex.Unlock()
+    
+    for client := range rooms[roomID] {
+        err := client.WriteMessage(websocket.TextMessage, msg)
+        if err != nil {
+            log.Println("Write Error:", err)
+            client.Close()
+            delete(rooms[roomID], client)
+        }
+    }
 }
 
 // ゲーム開始処理
 func setupGame(roomID string) {
-	sendMessageHost(roomID, []byte("controller connected"))
 	time.AfterFunc(time.Second, func() {
 		sendMessageAll(roomID, []byte("count3"))
 		time.AfterFunc(time.Second, func() {
