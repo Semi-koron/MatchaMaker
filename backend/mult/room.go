@@ -177,7 +177,6 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 			}
 			sendMessageAll(roomID, []byte("userList|" + userList))
 			setupGame(roomID)
-			sendMessageAll(roomID, []byte("pluckTeaGame"))
 		case string(msg) == "result":
 			// スコアを送信
 			scoreList := ""
@@ -186,10 +185,14 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 			}
 			sendMessageAll(roomID, []byte("scoreList|" + scoreList))
 			score[roomID] = make(map[*websocket.Conn]int)
-			case string(msg) == "millstoneStart":
+		case string(msg) == "millstoneStart":
 			// ミルストーンゲーム開始
 			sendMessageAll(roomID, []byte("millstoneGame"))
 			currentGame[roomID] = "millstoneGame"
+		case string(msg) == "pluckTeaStart":
+			// 茶摘みゲーム開始
+			sendMessageAll(roomID, []byte("pluckTeaGame"))
+			currentGame[roomID] = "pluckTeaGame"
 		default:
 			// ユーザー名付きのメッセージをホストに送信
 			formattedMsg := fmt.Sprintf("%s@%s", userName, string(msg))

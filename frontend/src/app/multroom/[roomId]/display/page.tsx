@@ -65,7 +65,7 @@ export default function QRCodePage() {
           //最後の要素が空文字列の場合削除
           if (userList[userList.length - 1] === "") userList.pop();
           setPlayerName(userList);
-          console.log(userList);
+          sendMessage("pluckTeaStart");
         }
     }
   }, [messages, currentGame, clearMessages, sendMessage]); // `messages` の変化を監視
