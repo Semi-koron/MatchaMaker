@@ -84,19 +84,18 @@ export default function FermentationGame({
         return newStopped;
       });
       const score = scoreCalc(color);
-      // 3秒後にスコアを送信
-      setTimeout(() => {
-        sendMessage(
-          "score" + String(score).padStart(3, "0") + playerName[index]
-        );
-      }, 3000);
+
+      sendMessage("score" + String(score).padStart(3, "0") + playerName[index]);
 
       // 全員が発酵を終了したかどうか
       if (
         isStopped.length === playerName.length &&
         isStopped.every((stopped) => stopped)
       ) {
-        sendMessage("millstoneStart");
+        // 3秒後にスコアを送信
+        setTimeout(() => {
+          sendMessage("millstoneStart");
+        }, 3000);
       }
     }
   }, [messages]);
