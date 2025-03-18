@@ -86,19 +86,21 @@ export default function FermentationGame({
       const score = scoreCalc(color);
 
       sendMessage("score" + String(score).padStart(3, "0") + playerName[index]);
-
-      // 全員が発酵を終了したかどうか
-      if (
-        isStopped.length === playerName.length &&
-        isStopped.every((stopped) => stopped)
-      ) {
-        // 3秒後にスコアを送信
-        setTimeout(() => {
-          sendMessage("millstoneStart");
-        }, 3000);
-      }
     }
   }, [messages]);
+
+  useEffect(() => {
+    // 全員が発酵を終了したかどうか
+    if (
+      isStopped.length === playerName.length &&
+      isStopped.every((stopped) => stopped)
+    ) {
+      // 3秒後にスコアを送信
+      setTimeout(() => {
+        sendMessage("millstoneStart");
+      }, 3000);
+    }
+  }, [isStopped]);
 
   const rgbToHex = (r: number, g: number, b: number) =>
     `#${[r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("")}`;
