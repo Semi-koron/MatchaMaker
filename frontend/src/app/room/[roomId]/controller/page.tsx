@@ -11,8 +11,8 @@ export default function ControllerPage() {
   const param = useParams();
   const roomId = param.roomId as string | undefined;
   const { messages, sendMessage, clearMessages } = useRoomJoin(roomId ?? "");
-  const motion = useMotion();
-  const orientation = useOrientation();
+  const { acceleration: motion } = useMotion();
+  const { orientation } = useOrientation();
 
   const [currentGame, setCurrentGame] = useState<string>("pluckTeaGame"); // デフォルトのゲーム
 

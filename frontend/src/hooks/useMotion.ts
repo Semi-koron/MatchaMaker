@@ -6,8 +6,31 @@ const useMotion = () => {
     y: number;
     z: number;
   } | null>(null);
+  const [permissionGranted, setPermissionGranted] = useState<boolean | null>(
+    null
+  );
 
   useEffect(() => {
+    const requestPermission = async () => {
+      if (
+        typeof DeviceMotionEvent !== "undefined" &&
+        (DeviceMotionEvent as any).requestPermission
+      ) {
+        try {
+          const permission = await (
+            DeviceMotionEvent as any
+          ).requestPermission();
+          setPermissionGranted(permission === "granted");
+        } catch (error) {
+          console.error("DeviceMotion permission request failed:", error);
+          setPermissionGranted(false);
+        }
+      } else {
+        // ブラウザが requestPermission() を必要としない場合
+        setPermissionGranted(true);
+      }
+    };
+
     const handleMotion = (event: DeviceMotionEvent) => {
       if (event.acceleration) {
         setAcceleration({
@@ -18,14 +41,18 @@ const useMotion = () => {
       }
     };
 
-    window.addEventListener("devicemotion", handleMotion);
+    if (permissionGranted === true) {
+      window.addEventListener("devicemotion", handleMotion);
+    } else if (permissionGranted === null) {
+      requestPermission();
+    }
 
     return () => {
       window.removeEventListener("devicemotion", handleMotion);
     };
-  }, []);
+  }, [permissionGranted]);
 
-  return acceleration;
+  return { acceleration, permissionGranted };
 };
 
 export default useMotion;
