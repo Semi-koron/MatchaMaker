@@ -130,7 +130,7 @@ export default function PluckTeaGame({
         <h1>{count}</h1>
       ) : (
         <>
-          <h1>茶葉を取れ！</h1>
+          {isFinished ? <h1>終了</h1> : <h1>茶葉を取れ！</h1>}
           {playerName.map((_, index) => (
             <Image
               key={index}
@@ -145,6 +145,7 @@ export default function PluckTeaGame({
                 transform:
                   "translate(-50%, -50%)" +
                   `rotate(${rotationRef.current[index] + Math.PI / 2}rad)`,
+                zIndex: 10,
               }}
             />
           ))}
@@ -167,7 +168,14 @@ export default function PluckTeaGame({
               left: "10px",
             }}
           >
-            スコア: {score}
+            {
+              // 全員のスコアを表示
+              playerName.map((name, index) => (
+                <div key={index}>
+                  {name}: {score[index]}
+                </div>
+              ))
+            }
           </h2>
         </>
       )}

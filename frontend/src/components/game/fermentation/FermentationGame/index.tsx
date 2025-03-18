@@ -177,20 +177,22 @@ export default function FermentationGame({
                     }}
                   ></div>
                 </div>
-                {playerName.map((name, index) => (
-                  <div key={index} className={style["result-wrapper"]}>
-                    <div className={style["color-wrapper"]}>
-                      <h3>{name}の色</h3>
-                      <div
-                        className={style["goal-color"]}
-                        style={{
-                          backgroundColor: selectedColor[index],
-                        }}
-                      ></div>
+                <div className={style["player-wrapper"]}>
+                  {playerName.map((name, index) => (
+                    <div key={index} className={style["result-wrapper"]}>
+                      <div className={style["color-wrapper"]}>
+                        <h3>{name}の色</h3>
+                        <div
+                          className={style["goal-color"]}
+                          style={{
+                            backgroundColor: selectedColor[index],
+                          }}
+                        ></div>
+                      </div>
+                      <h3>スコア: {scoreCalc(selectedColor[index])}</h3>
                     </div>
-                    <h3>スコア: {scoreCalc(selectedColor[index])}</h3>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </>
             ) : (
               <>

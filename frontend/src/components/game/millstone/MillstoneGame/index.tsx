@@ -78,22 +78,29 @@ export default function MillstoneGame({
         <h1>{count}</h1>
       ) : (
         <>
-          <h1>スマホを回せ！</h1>
-          {playerName.map((name, index) => (
-            <div key={index}>
-              <h3>{name}</h3>
-              <Image
-                src="/millstone.svg"
-                alt="millstone"
-                width={256}
-                height={256}
-                style={{
-                  transform: `rotate(${millstopneAngleRef.current[index]}deg)`,
-                }}
-              />
-              <h2>{Math.floor(millstopneAngleRef.current[index] / 360)}回転</h2>
+          {isFinished ? (
+            <h1>終了</h1>
+          ) : (
+            <div className={style["player-wrapper"]}>
+              {playerName.map((name, index) => (
+                <div key={index}>
+                  <h3>{name}</h3>
+                  <Image
+                    src="/millstone.svg"
+                    alt="millstone"
+                    width={256}
+                    height={256}
+                    style={{
+                      transform: `rotate(${millstopneAngleRef.current[index]}deg)`,
+                    }}
+                  />
+                  <h2>
+                    {Math.floor(millstopneAngleRef.current[index] / 360)}回転
+                  </h2>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </>
       )}
     </div>

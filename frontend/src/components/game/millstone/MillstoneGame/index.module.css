@@ -7,3 +7,9 @@
   align-items: center;
   gap: 24px;
 }
+
+.player-wrapper {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
