@@ -3,7 +3,6 @@ package millstone
 // ルーム接続の処理
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -53,7 +52,6 @@ func nextGame(roomID string, game string) {
 
 func timeup(roomID string) {
 	// 30秒後にtimeupを送信
-	fmt.Println("test")
 	time.AfterFunc(30*time.Second, func() {
 		sendMessage(roomID, []byte("finish"))
 		time.AfterFunc(5*time.Second, func() {
