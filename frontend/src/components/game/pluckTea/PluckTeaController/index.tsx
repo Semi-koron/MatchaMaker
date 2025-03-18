@@ -23,7 +23,7 @@ export default function PluckTeaController({
       }
     };
     // 1秒間に60回実行
-    const intervalId = setInterval(handleOrientation, 1000 / 60);
+    const intervalId = setInterval(handleOrientation, 1000 / 10);
     return () => clearInterval(intervalId);
   }, [orientation]);
 
