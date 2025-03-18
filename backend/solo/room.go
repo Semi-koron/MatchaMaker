@@ -1,4 +1,4 @@
-package millstone
+package solo
 
 // ルーム接続の処理
 
