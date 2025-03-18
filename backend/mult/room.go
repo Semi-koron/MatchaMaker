@@ -176,8 +176,6 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 			// ミルストーンゲーム開始
 			sendMessageAll(roomID, []byte("millstoneGame"))
 			currentGame[roomID] = "millstoneGame"
-			setupGame(roomID)
-
 		default:
 			// ユーザー名付きのメッセージをホストに送信
 			formattedMsg := fmt.Sprintf("%s@%s", userName, string(msg))
