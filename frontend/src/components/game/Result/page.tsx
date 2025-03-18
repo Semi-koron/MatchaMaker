@@ -14,8 +14,6 @@ export default function Result({ sendMessage, messages }: ResultProps) {
 
   useEffect(() => {
     sendMessage("result");
-    messages;
-    console.log("Result");
   }, []);
 
   useEffect(() => {

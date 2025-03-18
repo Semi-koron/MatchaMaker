@@ -25,9 +25,6 @@ const useRoomJoin = (roomId: string) => {
       setMessages((prev) => {
         // 既に含まれているなら変更しない
         if (prev.includes(event.data)) return prev;
-
-        const newMessages = [...prev, event.data];
-
         // 必要なメッセージを維持する
         const importantMessages = ["controller connected", "start", "finish"];
         const filteredMessages = importantMessages.filter((msg) =>
