@@ -52,11 +52,13 @@ const MillstoneController = ({
     if (!isFinished) return;
     if (isStarted) return;
     // 0.1秒ごとに角度を送信
-    const interval = setInterval(() => {
+    const handlemill = () => {
+      console.log("test");
       sendMessage(String(millstoneAngleRef.current));
-    }, 100);
-    return () => clearInterval(interval);
-  }, []);
+    };
+    const intervalId = setInterval(handlemill, 100);
+    return () => clearInterval(intervalId);
+  }, [isStarted, isFinished]);
 
   return (
     <div>
