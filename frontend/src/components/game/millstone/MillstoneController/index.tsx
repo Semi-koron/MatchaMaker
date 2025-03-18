@@ -49,16 +49,15 @@ const MillstoneController = ({
 
   // 定期的に millstoneAngleRef.current を送信する
   useEffect(() => {
-    if (!isFinished) return;
-    if (isStarted) return;
     // 0.1秒ごとに角度を送信
+    if (isFinished) return;
     const handlemill = () => {
       console.log("test");
       sendMessage(String(millstoneAngleRef.current));
     };
     const intervalId = setInterval(handlemill, 100);
     return () => clearInterval(intervalId);
-  }, [isStarted, isFinished]);
+  }, [isStarted]);
 
   return (
     <div>
