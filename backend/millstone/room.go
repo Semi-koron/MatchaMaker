@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
+var currentGame = "pluckTeaGame"
 
 // WebSocket のアップグレーダー
 var upgrader = websocket.Upgrader{

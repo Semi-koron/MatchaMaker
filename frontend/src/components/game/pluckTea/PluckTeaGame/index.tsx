@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { useMemo } from "react";
 
 type PluckTeaGameProps = {
   messages: string[];
@@ -9,6 +10,9 @@ type PluckTeaGameProps = {
 export default function PluckTeaGame({ messages }: PluckTeaGameProps) {
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [count, setCount] = useState<number>(3);
+  const [score, setScore] = useState<number>(0);
+  const xTeaPositionRef = useRef(0);
+  const yTeaPositionRef = useRef(0);
   const xPleyerPositionRef = useRef(0);
   const yPleyerPositionRef = useRef(0);
   const rotationRef = useRef(0);
@@ -55,9 +59,30 @@ export default function PluckTeaGame({ messages }: PluckTeaGameProps) {
         if (yPleyerPositionRef.current > window.innerHeight)
           yPleyerPositionRef.current = window.innerHeight;
         rotationRef.current = Math.atan2(dy / vectorLength, dx / vectorLength);
+        // 茶葉を取ったかどうか
+        if (messages.includes("start") && !messages.includes("finish")) {
+          const distance = Math.sqrt(
+            Math.pow(xPleyerPositionRef.current - xTeaPositionRef.current, 2) +
+              Math.pow(yPleyerPositionRef.current - yTeaPositionRef.current, 2)
+          );
+          if (distance < 100) {
+            setScore((prev) => prev + 1);
+            randomSpownReaf();
+          }
+        }
         break;
     }
   }, [messages]);
+
+  const randomSpownReaf = () => {
+    xTeaPositionRef.current = Math.random() * window.innerWidth;
+    yTeaPositionRef.current = Math.random() * window.innerHeight;
+  };
+
+  const isDarkmode = useMemo(
+    () => window.matchMedia("(prefers-color-scheme: dark)").matches,
+    []
+  );
 
   return (
     <>
@@ -80,6 +105,28 @@ export default function PluckTeaGame({ messages }: PluckTeaGameProps) {
                 `rotate(${rotationRef.current + Math.PI / 2}rad)`,
             }}
           />
+          <Image
+            src="/tea.svg"
+            alt="tea"
+            width={100}
+            height={100}
+            color={isDarkmode ? "#213b22" : "#e7ffde"}
+            style={{
+              position: "fixed",
+              top: `${yTeaPositionRef.current}px`,
+              left: `${xTeaPositionRef.current}px`,
+              transform: "translate(-50%, -50%)",
+            }}
+          />
+          <h2
+            style={{
+              position: "fixed",
+              top: "10px",
+              left: "10px",
+            }}
+          >
+            スコア: {score}
+          </h2>
         </>
       )}
     </>

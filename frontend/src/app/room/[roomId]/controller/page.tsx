@@ -33,14 +33,6 @@ export default function ControllerPage() {
     }
   }, [messages, currentGame, clearMessages]); // `messages` の変化を監視
 
-  useEffect(() => {
-    (DeviceMotionEvent as any).requestPermission?.().then((response: any) => {
-      if (response === "granted") {
-        console.log("granted");
-      }
-    });
-  }, []);
-
   const renderController = () => {
     switch (currentGame) {
       case "millstoneGame":
