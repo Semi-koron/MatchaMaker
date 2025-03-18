@@ -1,20 +1,5 @@
 import { useState, useEffect } from "react";
 
-const requestPermission = async () => {
-  // @ts-expect-error only safari property
-  if (typeof DeviceMotionEvent.requestPermission === "function") {
-    try {
-      // @ts-expect-error only safari property
-      const permissionState = await DeviceMotionEvent.requestPermission();
-      if (permissionState !== "granted") {
-        console.warn("Device Motion permission denied.");
-      }
-    } catch (error) {
-      console.error("Error requesting Device Motion permission:", error);
-    }
-  }
-};
-
 const useMotion = () => {
   const [acceleration, setAcceleration] = useState<{
     x: number;
@@ -32,8 +17,6 @@ const useMotion = () => {
         });
       }
     };
-
-    requestPermission();
 
     window.addEventListener("devicemotion", handleMotion);
 

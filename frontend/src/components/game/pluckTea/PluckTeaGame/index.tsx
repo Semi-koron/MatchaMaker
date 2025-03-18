@@ -49,8 +49,7 @@ export default function PluckTeaGame({
         let parsedMessage;
         try {
           parsedMessage = JSON.parse(lastMessage);
-        } catch (e) {
-          console.error(e);
+        } catch {
           break;
         }
         const { dx, dy } = parsedMessage;

@@ -15,12 +15,13 @@ const MillstoneController = ({
   const [millstoneAngle, setMillstoneAngle] = useState<number>(0); // 石臼の回転角度
   const [angularVelocity, setAngularVelocity] = useState<number>(0); // 角速度 (ω)
 
+  const isStarted = messages.includes("start");
+  const isFinished = messages.includes("finish");
+
   const inertia = 1; // 慣性モーメント (適当な値、調整可能)
   const friction = 0.4; // 摩擦による減衰率 (少しずつ減衰)
 
   useEffect(() => {
-    const isStarted = messages.includes("start");
-    const isFinished = messages.includes("finish");
     if (motion && !isFinished && isStarted) {
       const dt = 0.05; // 時間間隔 (50ms)
 
@@ -49,6 +50,8 @@ const MillstoneController = ({
 
   // 定期的に millstoneAngle を送信する
   useEffect(() => {
+    if (isFinished) return;
+    if (!isStarted) return;
     sendMessage(millstoneAngle.toString());
   }, [millstoneAngle, sendMessage]);
 

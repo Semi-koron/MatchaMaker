@@ -1,0 +1,18 @@
+.goal-color {
+  width: 500px;
+  height: 500px;
+  border-radius: 20px;
+}
+
+.color-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+}
+
+.result-wrapper {
+  display: flex;
+  gap: 24px;
+}

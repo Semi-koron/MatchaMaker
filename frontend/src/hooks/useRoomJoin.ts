@@ -22,6 +22,7 @@ const useRoomJoin = (roomId: string) => {
 
     // メッセージ受信
     socket.onmessage = (event) => {
+      console.log(`📩 Message received: ${event.data}`);
       setMessages((prev) => {
         // 既に含まれているなら変更しない
         if (prev.includes(event.data)) return prev;

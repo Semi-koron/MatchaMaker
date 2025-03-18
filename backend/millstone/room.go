@@ -61,8 +61,8 @@ func timeup(roomID string) {
 		time.AfterFunc(5*time.Second, func() {
 			switch currentGame[roomID] {
 			case "pluckTeaGame":
-				nextGame(roomID, "millstoneGame")
-				currentGame[roomID] = "millstoneGame"
+				nextGame(roomID, "fermentationGame")
+				currentGame[roomID] = "fermentationGame"
 			case "millstoneGame":
 				nextGame(roomID, "resultPage")
 				currentGame[roomID] = "result"
@@ -82,6 +82,9 @@ func setupGame (roomID string) {
 				sendMessage(roomID, []byte("count1"))
 				time.AfterFunc(time.Second, func() {
 					sendMessage(roomID, []byte("start"))
+					if(currentGame[roomID] == "fermentationGame") {
+						return;
+					}
 					timeup(roomID)
 				})
 			})
@@ -136,6 +139,10 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 				log.Println("score:", score[roomID])
 			}
 			fmt.Println("score:", score[roomID])
+			if(currentGame[roomID] == "fermentationGame") {
+				nextGame(roomID, "millstoneGame")
+				currentGame[roomID] = "millstoneGame"
+			}
 		}
 		if string(msg) == "nextGame" {
 			setupGame(roomID)

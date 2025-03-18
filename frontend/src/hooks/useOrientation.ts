@@ -1,21 +1,5 @@
 import { useState, useEffect } from "react";
 
-const requestPermission = async () => {
-  // @ts-expect-error only safari property
-  if (typeof DeviceOrientationEvent.requestPermission === "function") {
-    try {
-      const permissionState =
-        // @ts-expect-error only safari property
-        await DeviceOrientationEvent.requestPermission();
-      if (permissionState !== "granted") {
-        console.warn("Device Orientation permission denied.");
-      }
-    } catch (error) {
-      console.error("Error requesting Device Orientation permission:", error);
-    }
-  }
-};
-
 const useOrientation = () => {
   const [orientation, setOrientation] = useState<{
     alpha: number;
@@ -31,7 +15,7 @@ const useOrientation = () => {
         gamma: event.gamma ?? 0, // 左右の傾き（ロール）
       });
     };
-    requestPermission();
+
     window.addEventListener("deviceorientation", handleOrientation);
 
     return () => {

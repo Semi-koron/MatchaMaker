@@ -3,7 +3,6 @@ import { useEffect } from "react";
 
 type PluckTeaControllerProps = {
   orientation: { gamma: number; beta: number } | null;
-  messages: string[];
   sendMessage: (message: string) => void;
 };
 

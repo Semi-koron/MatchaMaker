@@ -7,6 +7,7 @@ import useRoomJoin from "@/hooks/useRoomJoin";
 import MillstoneGame from "@/components/game/millstone/MillstoneGame";
 import PluckTeaGame from "@/components/game/pluckTea/PluckTeaGame";
 import Result from "@/components/game/Result/page";
+import FermentationGame from "@/components/game/fermentation/FermentationGame";
 
 export default function QRCodePage() {
   const param = useParams();
@@ -35,6 +36,13 @@ export default function QRCodePage() {
           clearMessages();
         }
         break;
+      case "fermentationGame":
+        if (currentGame !== "fermentationGame") {
+          setCurrentGame("fermentationGame");
+          clearMessages();
+          sendMessage("nextGame");
+        }
+        break;
       case "millstoneGame":
         if (currentGame !== "millstoneGame") {
           setCurrentGame("millstoneGame");
@@ -52,10 +60,14 @@ export default function QRCodePage() {
 
   const renderGame = () => {
     switch (currentGame) {
-      case "millstoneGame":
-        return <MillstoneGame messages={messages} sendMessage={sendMessage} />;
       case "pluckTeaGame":
         return <PluckTeaGame messages={messages} sendMessage={sendMessage} />;
+      case "fermentationGame":
+        return (
+          <FermentationGame messages={messages} sendMessage={sendMessage} />
+        );
+      case "millstoneGame":
+        return <MillstoneGame messages={messages} sendMessage={sendMessage} />;
       case "resultPage":
         return <Result messages={messages} sendMessage={sendMessage} />;
       default:

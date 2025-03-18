@@ -7,6 +7,7 @@ import useMotion from "@/hooks/useMotion";
 import useOrientation from "@/hooks/useOrientation";
 import MillstoneController from "@/components/game/millstone/MillstoneController";
 import PluckTeaController from "@/components/game/pluckTea/PluckTeaController";
+import FermentationController from "@/components/game/fermentation/FermentationController";
 
 export default function ControllerPage() {
   const param = useParams();
@@ -26,6 +27,12 @@ export default function ControllerPage() {
           clearMessages();
         }
         break;
+      case "fermentationGame":
+        if (currentGame !== "fermentationGame") {
+          setCurrentGame("fermentationGame");
+          clearMessages();
+        }
+        break;
       case "millstoneGame":
         if (currentGame !== "millstoneGame") {
           setCurrentGame("millstoneGame");
@@ -37,18 +44,25 @@ export default function ControllerPage() {
 
   const renderController = () => {
     switch (currentGame) {
-      case "millstoneGame":
+      case "pluckTeaGame":
         return (
-          <MillstoneController
+          <PluckTeaController
+            orientation={orientation}
+            sendMessage={sendMessage}
+          />
+        );
+      case "fermentationGame":
+        return (
+          <FermentationController
             motion={motion}
             messages={messages}
             sendMessage={sendMessage}
           />
         );
-      case "pluckTeaGame":
+      case "millstoneGame":
         return (
-          <PluckTeaController
-            orientation={orientation}
+          <MillstoneController
+            motion={motion}
             messages={messages}
             sendMessage={sendMessage}
           />
