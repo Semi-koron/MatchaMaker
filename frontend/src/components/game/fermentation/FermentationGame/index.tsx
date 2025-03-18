@@ -96,7 +96,7 @@ export default function FermentationGame({
         isStopped.length === playerName.length &&
         isStopped.every((stopped) => stopped)
       ) {
-        sendMessage("millstoneGame");
+        sendMessage("millstoneStart");
       }
     }
   }, [messages]);
