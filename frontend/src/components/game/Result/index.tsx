@@ -6,10 +6,15 @@ import style from "./index.module.css";
 type ResultProps = {
   sendMessage: (message: string) => void;
   messages: string[];
+  playerName: string[];
 };
 
-export default function Result({ sendMessage, messages }: ResultProps) {
-  const [score, setScore] = useState<number>(0);
+export default function Result({
+  sendMessage,
+  messages,
+  playerName,
+}: ResultProps) {
+  const [score, setScore] = useState<number[]>();
   const router = useRouter();
 
   useEffect(() => {
@@ -22,16 +27,26 @@ export default function Result({ sendMessage, messages }: ResultProps) {
     const lastMessage = messages[messages.length - 1];
 
     // lastMessageが"total score"で始まる場合
-    if (lastMessage.startsWith("total score")) {
-      const total = parseInt(lastMessage.slice(11));
-      setScore(total);
+    if (lastMessage.startsWith("scoreList")) {
+      const scoreList = lastMessage.split("|")[1].split("|");
+      const score = scoreList.map((score) => {
+        return parseInt(score.split("@")[1]);
+      });
+      setScore(score);
     }
   }, [messages]);
 
   return (
     <div className={style["result-wrapper"]}>
-      <h1>total score: {score}</h1>
-
+      {score?.map((score, index) => {
+        return (
+          <div key={index} className={style["score-wrapper"]}>
+            <h2>
+              {playerName[index]}: {score}
+            </h2>
+          </div>
+        );
+      })}
       <Button onClick={() => router.push("/")}>
         <h2>タイトル画面へ</h2>
       </Button>

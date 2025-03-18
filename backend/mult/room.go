@@ -66,6 +66,9 @@ func setupGame(roomID string) {
 				sendMessageAll(roomID, []byte("count1"))
 				time.AfterFunc(time.Second, func() {
 					sendMessageAll(roomID, []byte("start"))
+					if(currentGame[roomID] == "fermentationGame"){
+						return
+					}
 					timeup(roomID)
 				})
 			})
@@ -171,7 +174,11 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 			sendMessageAll(roomID, []byte("pluckTeaGame"))
 		case string(msg) == "result":
 			// スコアを送信
-			sendMessageAll(roomID, []byte("total score"+fmt.Sprint(score[roomID])))
+			scoreList := ""
+			for conn, name := range user[roomID] {
+				scoreList += fmt.Sprintf("%s@%d|", name, score[roomID][conn])
+			}
+			sendMessageAll(roomID, []byte("scoreList|" + scoreList))
 			score[roomID] = make(map[*websocket.Conn]int)
 			case string(msg) == "millstoneStart":
 			// ミルストーンゲーム開始

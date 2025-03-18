@@ -42,6 +42,13 @@ export default function FermentationGame({
     let step = 0;
     const interval = setInterval(() => {
       if (step >= steps) {
+        setIsStopped((prev) => {
+          const newStopped = [...prev];
+          for (let i = 0; i < playerName.length; i++) {
+            newStopped[i] = true;
+          }
+          return newStopped;
+        });
         clearInterval(interval);
         return;
       }
@@ -101,6 +108,14 @@ export default function FermentationGame({
       }, 3000);
     }
   }, [isStopped]);
+
+  useEffect(() => {
+    if (selectedColor.length !== playerName.length) {
+      for (let i = 0; i < playerName.length; i++) {
+        setSelectedColor((prev) => [...prev, endColor]);
+      }
+    }
+  }, []);
 
   const rgbToHex = (r: number, g: number, b: number) =>
     `#${[r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("")}`;

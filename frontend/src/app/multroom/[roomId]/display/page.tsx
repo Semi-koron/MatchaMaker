@@ -123,7 +123,13 @@ export default function QRCodePage() {
           />
         );
       case "resultPage":
-        return <Result messages={messages} sendMessage={sendMessage} />;
+        return (
+          <Result
+            messages={messages}
+            sendMessage={sendMessage}
+            playerName={playerName}
+          />
+        );
       default:
         return <h3>ゲームの選択肢が見つかりません。</h3>;
     }
