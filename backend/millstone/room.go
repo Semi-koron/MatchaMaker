@@ -3,6 +3,7 @@ package millstone
 // ルーム接続の処理
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -33,6 +34,8 @@ var upgrader = websocket.Upgrader{
 
 // ルーム管理用のマップ
 var rooms = make(map[string]map[*websocket.Conn]bool)
+var currentGame = make(map[string]string)
+var score = make(map[string]int)
 
 func sendMessage(roomID string, msg []byte) {
 	for client := range rooms[roomID] {
@@ -47,6 +50,7 @@ func sendMessage(roomID string, msg []byte) {
 
 func nextGame(roomID string, game string) {
 	sendMessage(roomID, []byte(game))
+	if (game == "resultPage") {return;}
 	timeup(roomID)
 }
 
@@ -55,7 +59,14 @@ func timeup(roomID string) {
 	time.AfterFunc(30*time.Second, func() {
 		sendMessage(roomID, []byte("finish"))
 		time.AfterFunc(5*time.Second, func() {
-			nextGame(roomID, "millstoneGame")
+			switch currentGame[roomID] {
+			case "pluckTeaGame":
+				nextGame(roomID, "millstoneGame")
+				currentGame[roomID] = "millstoneGame"
+			case "millstoneGame":
+				nextGame(roomID, "resultPage")
+				currentGame[roomID] = "result"
+			}
 		})
 	})
 }
@@ -96,6 +107,8 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	// ルームがなければ作成
 	if rooms[roomID] == nil {
 		rooms[roomID] = make(map[*websocket.Conn]bool)
+		currentGame[roomID] = "pluckTeaGame"
+		score[roomID] = 0
 	}
 	if len(rooms[roomID]) >= 2 {
 		log.Println("Room is full")
@@ -116,8 +129,20 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 			delete(rooms[roomID], conn)
 			break
 		}
+		if string(msg[:5]) == "score" {
+			if len(msg) >= 8 {
+				scoreValue := (int(msg[5]-'0')*100 + int(msg[6]-'0')*10 + int(msg[7]-'0'))
+				score[roomID] += scoreValue
+				log.Println("score:", score[roomID])
+			}
+			fmt.Println("score:", score[roomID])
+		}
 		if string(msg) == "nextGame" {
 			setupGame(roomID)
+		}
+		if string(msg) == "result" {
+			sendMessage(roomID, []byte("total score" + fmt.Sprint(score[roomID])))
+			score[roomID] = 0
 		}
 		// ルーム内の全クライアントにメッセージを送信
 		sendMessage(roomID, msg)

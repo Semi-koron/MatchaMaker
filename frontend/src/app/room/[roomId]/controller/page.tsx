@@ -1,6 +1,7 @@
 "use client";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import useRoomJoin from "@/hooks/useRoomJoin";
 import useMotion from "@/hooks/useMotion";
 import useOrientation from "@/hooks/useOrientation";
@@ -13,6 +14,7 @@ export default function ControllerPage() {
   const { messages, sendMessage, clearMessages } = useRoomJoin(roomId ?? "");
   const motion = useMotion();
   const orientation = useOrientation();
+  const router = useRouter();
 
   const [currentGame, setCurrentGame] = useState<string>("pluckTeaGame"); // デフォルトのゲーム
 
@@ -51,6 +53,8 @@ export default function ControllerPage() {
             sendMessage={sendMessage}
           />
         );
+      case "resultPage":
+        router.push("/");
       default:
         return <h3>ゲームの選択肢が見つかりません。</h3>;
     }

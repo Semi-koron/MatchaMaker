@@ -5,9 +5,13 @@ import style from "./index.module.css";
 
 type MillstoneGameProps = {
   messages: string[];
+  sendMessage: (message: string) => void;
 };
 
-export default function MillstoneGame({ messages }: MillstoneGameProps) {
+export default function MillstoneGame({
+  messages,
+  sendMessage,
+}: MillstoneGameProps) {
   const [millstoneAngle, setMillstoneAngle] = useState<number>(0);
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [count, setCount] = useState<number>(3);
@@ -19,6 +23,13 @@ export default function MillstoneGame({ messages }: MillstoneGameProps) {
 
     switch (lastMessage) {
       case "finish":
+        console.log(
+          String(Math.round((millstoneAngle / 360) * 30)).padStart(3, "0")
+        );
+        sendMessage(
+          "score" +
+            String(Math.round((millstoneAngle / 360) * 30)).padStart(3, "0")
+        );
         setIsFinished(true);
         break;
       case "count3":

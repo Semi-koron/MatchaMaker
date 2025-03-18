@@ -5,9 +5,13 @@ import { useMemo } from "react";
 
 type PluckTeaGameProps = {
   messages: string[];
+  sendMessage: (message: string) => void;
 };
 
-export default function PluckTeaGame({ messages }: PluckTeaGameProps) {
+export default function PluckTeaGame({
+  messages,
+  sendMessage,
+}: PluckTeaGameProps) {
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [count, setCount] = useState<number>(3);
   const [score, setScore] = useState<number>(0);
@@ -23,6 +27,7 @@ export default function PluckTeaGame({ messages }: PluckTeaGameProps) {
 
     switch (lastMessage) {
       case "finish":
+        sendMessage("score" + String(score * 10).padStart(3, "0"));
         setIsFinished(true);
         break;
       case "count3":

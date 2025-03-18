@@ -22,14 +22,19 @@ const useRoomJoin = (roomId: string) => {
 
     // メッセージ受信
     socket.onmessage = (event) => {
-      console.log("📩 Received:", event.data);
-      // メッセージが新しいものであれば状態を更新
       setMessages((prev) => {
-        // メッセージが重複しないようにする処理
-        if (!prev.includes(event.data)) {
-          return [...prev, event.data];
-        }
-        return prev;
+        // 既に含まれているなら変更しない
+        if (prev.includes(event.data)) return prev;
+
+        const newMessages = [...prev, event.data];
+
+        // 必要なメッセージを維持する
+        const importantMessages = ["controller connected", "start", "finish"];
+        const filteredMessages = importantMessages.filter((msg) =>
+          prev.includes(msg)
+        );
+
+        return [...filteredMessages, event.data];
       });
     };
 
