@@ -9,7 +9,7 @@ export default function Title() {
   const handleClick = () => {
     // roomIdをランダムに生成
     const roomId = Math.random().toString(36).slice(-8);
-    const url = "/room/" + roomId + "/display";
+    const url = "/multroom/" + roomId + "/display";
     router.push(url);
   };
 

@@ -2,15 +2,18 @@
 import { useEffect, useRef, useState } from "react";
 import TeaLeafIcon from "@/components/TeaReafIcon/";
 import style from "./index.module.css";
+import { messagesProvider } from "../../util/messagesProvider";
 
 type FermentationGameProps = {
   sendMessage: (message: string) => void;
   messages: string[];
+  playerName: string[];
 };
 
 export default function FermentationGame({
   sendMessage,
   messages,
+  playerName,
 }: FermentationGameProps) {
   const startColor = "#62E466"; // 開始色
   const endColor = "#644B2A"; // 終了色
@@ -20,13 +23,22 @@ export default function FermentationGame({
 
   const [color, setColor] = useState(startColor);
   const [goalColor, setGoalColor] = useState<string>("#000000");
-  const [selectedColor, setSelectedColor] = useState<string>("#000000");
-  const [isStopped, setIsStopped] = useState<boolean>(false);
+  const [selectedColor, setSelectedColor] = useState<string[]>([]);
+  const [isStopped, setIsStopped] = useState<boolean[]>([]);
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   const isStarted = messages.includes("start");
 
   useEffect(() => {
+    if (isStopped.length !== playerName.length) {
+      for (let i = 0; i < playerName.length; i++) {
+        setIsStopped((prev) => [...prev, false]);
+      }
+    }
+  }, [playerName]);
+
+  useEffect(() => {
+    if (!isStarted) return;
     let step = 0;
     const interval = setInterval(() => {
       if (step >= steps) {
@@ -38,7 +50,7 @@ export default function FermentationGame({
     }, intervalTime);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isStarted]);
 
   useEffect(() => {
     if (svgRef.current) {
@@ -56,14 +68,36 @@ export default function FermentationGame({
   }, [goalColor, setGoalColor]);
 
   useEffect(() => {
-    if (messages[messages.length - 1] === "stop" && !isStopped) {
-      setIsStopped(true);
-      setSelectedColor(color);
+    const { msg, index } = messagesProvider(
+      messages[messages.length - 1],
+      playerName
+    );
+    if (msg === "stop" && !isStopped[index]) {
+      setSelectedColor((prev) => {
+        const newColor = [...prev];
+        newColor[index] = color;
+        return newColor;
+      });
+      setIsStopped((prev) => {
+        const newStopped = [...prev];
+        newStopped[index] = true;
+        return newStopped;
+      });
       const score = scoreCalc(color);
       // 3秒後にスコアを送信
       setTimeout(() => {
-        sendMessage("score" + String(score).padStart(3, "0"));
+        sendMessage(
+          "score" + String(score).padStart(3, "0") + playerName[index]
+        );
       }, 3000);
+
+      // 全員が発酵を終了したかどうか
+      if (
+        isStopped.length === playerName.length &&
+        isStopped.every((stopped) => stopped)
+      ) {
+        sendMessage("millstoneGame");
+      }
     }
   }, [messages]);
 
@@ -112,10 +146,12 @@ export default function FermentationGame({
     <>
       {isStarted ? (
         <>
-          {isStopped ? (
-            <>
-              <h2>発酵終了</h2>
-              <div className={style["result-wrapper"]}>
+          {
+            // 全員が発酵を終了したかどうか
+            isStopped.length === playerName.length &&
+            isStopped.every((stopped) => stopped) ? (
+              <>
+                <h2>発酵終了</h2>
                 <div className={style["color-wrapper"]}>
                   <h3>目標色</h3>
                   <div
@@ -125,25 +161,29 @@ export default function FermentationGame({
                     }}
                   ></div>
                 </div>
-                <div className={style["color-wrapper"]}>
-                  <h3>あなたの色</h3>
-                  <div
-                    className={style["goal-color"]}
-                    style={{
-                      backgroundColor: selectedColor,
-                    }}
-                  ></div>
-                </div>
-              </div>
-              <h3>スコア: {scoreCalc(selectedColor)}</h3>
-            </>
-          ) : (
-            <>
-              <h2>発酵中</h2>
-              <TeaLeafIcon color={color} />
-              <h3>発酵を辞める時はスマホを持ち上げる</h3>
-            </>
-          )}
+                {playerName.map((name, index) => (
+                  <div key={index} className={style["result-wrapper"]}>
+                    <div className={style["color-wrapper"]}>
+                      <h3>{name}の色</h3>
+                      <div
+                        className={style["goal-color"]}
+                        style={{
+                          backgroundColor: selectedColor[index],
+                        }}
+                      ></div>
+                    </div>
+                    <h3>スコア: {scoreCalc(selectedColor[index])}</h3>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <>
+                <h2>発酵中</h2>
+                <TeaLeafIcon color={color} />
+                <h3>発酵を辞める時はスマホを持ち上げる</h3>
+              </>
+            )
+          }
         </>
       ) : (
         <>

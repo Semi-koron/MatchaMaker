@@ -2,24 +2,37 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useMemo } from "react";
+import { messagesProvider } from "../../util/messagesProvider";
 
 type PluckTeaGameProps = {
   messages: string[];
   sendMessage: (message: string) => void;
+  playerName: string[];
 };
 
 export default function PluckTeaGame({
   messages,
   sendMessage,
+  playerName,
 }: PluckTeaGameProps) {
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [count, setCount] = useState<number>(3);
-  const [score, setScore] = useState<number>(0);
-  const xTeaPositionRef = useRef(0);
-  const yTeaPositionRef = useRef(0);
-  const xPleyerPositionRef = useRef(0);
-  const yPleyerPositionRef = useRef(0);
-  const rotationRef = useRef(0);
+  const [score, setScore] = useState<number[]>([]);
+  const xTeaPositionRef = useRef<number>(0);
+  const yTeaPositionRef = useRef<number>(0);
+  const xPleyerPositionRef = useRef<number[]>([]);
+  const yPleyerPositionRef = useRef<number[]>([]);
+  const rotationRef = useRef<number[]>([]);
+
+  useEffect(() => {
+    for (let i = 0; i < playerName.length; i++) {
+      xPleyerPositionRef.current.push(window.innerWidth / 2);
+      yPleyerPositionRef.current.push(window.innerHeight / 2);
+      rotationRef.current.push(0);
+      setScore((prev) => [...prev, 0]);
+    }
+    randomSpownReaf();
+  }, []);
 
   useEffect(() => {
     if (!messages.length) return;
@@ -27,7 +40,11 @@ export default function PluckTeaGame({
 
     switch (lastMessage) {
       case "finish":
-        sendMessage("score" + String(score * 10).padStart(3, "0"));
+        for (let i = 0; i < playerName.length; i++) {
+          sendMessage(
+            "score" + String(score[i]).padStart(3, "0") + playerName[i]
+          );
+        }
         setIsFinished(true);
         break;
       case "count3":
@@ -46,31 +63,50 @@ export default function PluckTeaGame({
         if (lastMessage === "controller connected") {
           return;
         }
+        const { msg, index } = messagesProvider(lastMessage, playerName);
+        if (index === -1) {
+          return;
+        }
         let parsedMessage;
         try {
-          parsedMessage = JSON.parse(lastMessage);
+          parsedMessage = JSON.parse(msg);
         } catch {
           break;
         }
         const { dx, dy } = parsedMessage;
-        xPleyerPositionRef.current += dx;
-        yPleyerPositionRef.current += dy;
+        xPleyerPositionRef.current[index] += dx;
+        yPleyerPositionRef.current[index] += dy;
         const vectorLength = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-        if (xPleyerPositionRef.current < 0) xPleyerPositionRef.current = 0;
-        if (yPleyerPositionRef.current < 0) yPleyerPositionRef.current = 0;
-        if (xPleyerPositionRef.current > window.innerWidth)
-          xPleyerPositionRef.current = window.innerWidth;
-        if (yPleyerPositionRef.current > window.innerHeight)
-          yPleyerPositionRef.current = window.innerHeight;
-        rotationRef.current = Math.atan2(dy / vectorLength, dx / vectorLength);
+        if (xPleyerPositionRef.current[index] < 0)
+          xPleyerPositionRef.current[index] = 0;
+        if (yPleyerPositionRef.current[index] < 0)
+          yPleyerPositionRef.current[index] = 0;
+        if (xPleyerPositionRef.current[index] > window.innerWidth)
+          xPleyerPositionRef.current[index] = window.innerWidth;
+        if (yPleyerPositionRef.current[index] > window.innerHeight)
+          yPleyerPositionRef.current[index] = window.innerHeight;
+        rotationRef.current[index] = Math.atan2(
+          dy / vectorLength,
+          dx / vectorLength
+        );
         // 茶葉を取ったかどうか
-        if (messages.includes("start") && !messages.includes("finish")) {
+        if (messages.includes("start") && !isFinished) {
           const distance = Math.sqrt(
-            Math.pow(xPleyerPositionRef.current - xTeaPositionRef.current, 2) +
-              Math.pow(yPleyerPositionRef.current - yTeaPositionRef.current, 2)
+            Math.pow(
+              xPleyerPositionRef.current[index] - xTeaPositionRef.current,
+              2
+            ) +
+              Math.pow(
+                yPleyerPositionRef.current[index] - yTeaPositionRef.current,
+                2
+              )
           );
           if (distance < 100) {
-            setScore((prev) => prev + 1);
+            setScore((prev) => {
+              const newScore = [...prev];
+              newScore[index] += 1;
+              return newScore;
+            });
             randomSpownReaf();
           }
         }
@@ -94,21 +130,24 @@ export default function PluckTeaGame({
         <h1>{count}</h1>
       ) : (
         <>
-          {isFinished ? <h1>終了！</h1> : <h1>茶葉を取れ！</h1>}
-          <Image
-            src="/player.svg"
-            alt="player"
-            width={153}
-            height={130}
-            style={{
-              position: "fixed",
-              top: `${yPleyerPositionRef.current}px`,
-              left: `${xPleyerPositionRef.current}px`,
-              transform:
-                "translate(-50%, -50%)" +
-                `rotate(${rotationRef.current + Math.PI / 2}rad)`,
-            }}
-          />
+          <h1>茶葉を取れ！</h1>
+          {playerName.map((_, index) => (
+            <Image
+              key={index}
+              src="/player.svg"
+              alt="player"
+              width={153}
+              height={130}
+              style={{
+                position: "fixed",
+                top: `${yPleyerPositionRef.current[index]}px`,
+                left: `${xPleyerPositionRef.current[index]}px`,
+                transform:
+                  "translate(-50%, -50%)" +
+                  `rotate(${rotationRef.current[index] + Math.PI / 2}rad)`,
+              }}
+            />
+          ))}
           <Image
             src={isDarkmode ? "/tea.svg" : "/tea_dark.svg"}
             alt="tea"

@@ -132,6 +132,9 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 			delete(rooms[roomID], conn)
 			break
 		}
+		
+		// ルーム内の全クライアントにメッセージを送信
+		sendMessage(roomID, msg)
 		if string(msg[:5]) == "score" {
 			if len(msg) >= 8 {
 				scoreValue := (int(msg[5]-'0')*100 + int(msg[6]-'0')*10 + int(msg[7]-'0'))
@@ -151,8 +154,6 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 			sendMessage(roomID, []byte("total score" + fmt.Sprint(score[roomID])))
 			score[roomID] = 0
 		}
-		// ルーム内の全クライアントにメッセージを送信
-		sendMessage(roomID, msg)
 	}
 }
 
