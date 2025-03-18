@@ -1,6 +1,6 @@
 "use client";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import useRoomJoin from "@/hooks/useRoomJoin";
 import useMotion from "@/hooks/useMotion";
 import useOrientation from "@/hooks/useOrientation";
@@ -32,6 +32,14 @@ export default function ControllerPage() {
         break;
     }
   }, [messages, currentGame, clearMessages]); // `messages` の変化を監視
+
+  useEffect(() => {
+    (DeviceMotionEvent as any).requestPermission?.().then((response: any) => {
+      if (response === "granted") {
+        console.log("granted");
+      }
+    });
+  }, []);
 
   const renderController = () => {
     switch (currentGame) {
