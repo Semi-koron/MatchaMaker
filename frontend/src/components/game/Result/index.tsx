@@ -28,9 +28,18 @@ export default function Result({
 
     // lastMessageが"total score"で始まる場合
     if (lastMessage.startsWith("scoreList")) {
-      const scoreList = lastMessage.split("|")[1].split("|");
-      const score = scoreList.map((score) => {
-        return parseInt(score.split("@")[1]);
+      const scoreList = lastMessage.split("|");
+      //scoreList|いいい@511|あああ@474|
+      const scoreData = scoreList.map((score, index) => {
+        if (index === 0) return;
+        const [name, point] = score.split("@");
+        //playerNameからnameを探して、そのindexを取得
+        const nameIndex = playerName.indexOf(name);
+        return { nameIndex, point: Number(point) };
+      });
+      const score = Array(playerName.length).fill(0);
+      scoreData.forEach((data) => {
+        if (data) score[data.nameIndex] = data.point;
       });
       setScore(score);
     }
