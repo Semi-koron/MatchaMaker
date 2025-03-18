@@ -8,6 +8,8 @@ import useOrientation from "@/hooks/useOrientation";
 import MillstoneController from "@/components/game/millstone/MillstoneController";
 import PluckTeaController from "@/components/game/pluckTea/PluckTeaController";
 import FermentationController from "@/components/game/fermentation/FermentationController";
+import style from "./page.module.css";
+import Permission from "@/components/game/Permission";
 
 export default function ControllerPage() {
   const param = useParams();
@@ -17,7 +19,7 @@ export default function ControllerPage() {
   const orientation = useOrientation();
   const router = useRouter();
 
-  const [currentGame, setCurrentGame] = useState<string>("pluckTeaGame"); // デフォルトのゲーム
+  const [currentGame, setCurrentGame] = useState<string>("loading"); // デフォルトのゲーム
 
   useEffect(() => {
     switch (messages[messages.length - 1]) {
@@ -44,6 +46,8 @@ export default function ControllerPage() {
 
   const renderController = () => {
     switch (currentGame) {
+      case "loading":
+        return <Permission sendMessage={sendMessage} messages={messages} />;
       case "pluckTeaGame":
         return (
           <PluckTeaController
@@ -74,5 +78,7 @@ export default function ControllerPage() {
     }
   };
 
-  return <div>{renderController()}</div>;
+  return (
+    <div className={style["controller-wrapper"]}>{renderController()}</div>
+  );
 }

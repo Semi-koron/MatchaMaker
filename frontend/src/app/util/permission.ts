@@ -9,6 +9,7 @@ export const requestPermission = async () => {
       }
     } catch (error) {
       console.error("Error requesting Device Motion permission:", error);
+      return false;
     }
   }
 
@@ -23,6 +24,9 @@ export const requestPermission = async () => {
       }
     } catch (error) {
       console.error("Error requesting Device Orientation permission:", error);
+      return false;
     }
   }
+
+  return true;
 };

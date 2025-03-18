@@ -1,7 +1,5 @@
 package mult
 
-// ルーム接続の処理
-
 import (
 	"fmt"
 	"log"
@@ -17,27 +15,36 @@ import (
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		allowUrl := os.Getenv("ALLOW_URL")
-		log.Println("ALLOW_URL:", allowUrl)
 		if allowUrl == "" {
 			allowUrl = "http://localhost:3000"
 		}
-		// リクエスト元の URL が許可リストに含まれているか確認
 		origin := r.Header.Get("Origin")
-		log.Println("Origin:", origin)
-		if origin != allowUrl {
-			log.Println("Origin not allowed:", r.Header.Get("Origin"))
-			return false
-		}
-		return true
+		return origin == allowUrl
 	},
 }
 
 // ルーム管理用のマップ
 var rooms = make(map[string]map[*websocket.Conn]bool)
+var roomHost = make(map[string]*websocket.Conn) // 各部屋のホストを管理
+var score = make(map[string]map[*websocket.Conn]int)
+var user = make(map[string]map[*websocket.Conn]string)
 var currentGame = make(map[string]string)
-var score = make(map[string]int)
 
-func sendMessage(roomID string, msg []byte) {
+// ホストのみにメッセージを送信
+func sendMessageHost(roomID string, msg []byte) {
+	host, exists := roomHost[roomID]
+	if exists {
+		err := host.WriteMessage(websocket.TextMessage, msg)
+		if err != nil {
+			log.Println("Write Error to Host:", err)
+			host.Close()
+			delete(roomHost, roomID)
+		}
+	}
+}
+
+// ルーム内の全員にメッセージを送信
+func sendMessageAll(roomID string, msg []byte) {
 	for client := range rooms[roomID] {
 		err := client.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
@@ -48,43 +55,17 @@ func sendMessage(roomID string, msg []byte) {
 	}
 }
 
-func nextGame(roomID string, game string) {
-	sendMessage(roomID, []byte(game))
-	if (game == "resultPage") {return;}
-	timeup(roomID)
-}
-
-func timeup(roomID string) {
-	// 30秒後にtimeupを送信
-	time.AfterFunc(30*time.Second, func() {
-		sendMessage(roomID, []byte("finish"))
-		time.AfterFunc(5*time.Second, func() {
-			switch currentGame[roomID] {
-			case "pluckTeaGame":
-				nextGame(roomID, "fermentationGame")
-				currentGame[roomID] = "fermentationGame"
-			case "millstoneGame":
-				nextGame(roomID, "resultPage")
-				currentGame[roomID] = "result"
-			}
-		})
-	})
-}
-
-func setupGame (roomID string) {
-	sendMessage(roomID, []byte("controller connected"))
-	// 3...2...1...のカウントダウン
+// ゲーム開始処理
+func setupGame(roomID string) {
+	sendMessageHost(roomID, []byte("controller connected"))
 	time.AfterFunc(time.Second, func() {
-		sendMessage(roomID, []byte("count3"))
+		sendMessageAll(roomID, []byte("count3"))
 		time.AfterFunc(time.Second, func() {
-			sendMessage(roomID, []byte("count2"))
+			sendMessageAll(roomID, []byte("count2"))
 			time.AfterFunc(time.Second, func() {
-				sendMessage(roomID, []byte("count1"))
+				sendMessageAll(roomID, []byte("count1"))
 				time.AfterFunc(time.Second, func() {
-					sendMessage(roomID, []byte("start"))
-					if(currentGame[roomID] == "fermentationGame") {
-						return;
-					}
+					sendMessageAll(roomID, []byte("start"))
 					timeup(roomID)
 				})
 			})
@@ -92,14 +73,28 @@ func setupGame (roomID string) {
 	})
 }
 
+// タイムアップ処理
+func timeup(roomID string) {
+	time.AfterFunc(30*time.Second, func() {
+		sendMessageAll(roomID, []byte("finish"))
+		time.AfterFunc(5*time.Second, func() {
+			switch currentGame[roomID] {
+			case "pluckTeaGame":
+				sendMessageAll(roomID, []byte("fermentationGame"))
+				currentGame[roomID] = "fermentationGame"
+			case "millstoneGame":
+				sendMessageAll(roomID, []byte("resultPage"))
+				currentGame[roomID] = "result"
+			}
+		})
+	})
+}
 
-
-// クライアントの WebSocket 接続を処理
+// WebSocket 接続を処理
 func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	roomID := vars["roomID"]
 
-	// WebSocket にアップグレード
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("WebSocket Upgrade Error:", err)
@@ -107,53 +102,86 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	// ルームがなければ作成
+	// ルームがなければ作成し、最初の参加者をホストにする
 	if rooms[roomID] == nil {
 		rooms[roomID] = make(map[*websocket.Conn]bool)
 		currentGame[roomID] = "pluckTeaGame"
-		score[roomID] = 0
-	}
-	if len(rooms[roomID]) >= 2 {
-		log.Println("Room is full")
-		return
-	}
-	rooms[roomID][conn] = true
-	log.Printf("Client connected to room: %s", roomID)
-	// 2人目が入室したら"controller connected"を送信
-	if len(rooms[roomID]) == 2 {
-		setupGame(roomID)
+		roomHost[roomID] = conn // 最初の参加者をホストにする
+		fmt.Println("Room created:", roomID, "Host assigned")
 	}
 
-	// クライアントのメッセージを受け取るループ
+	// 参加者を登録
+	rooms[roomID][conn] = true
+	if user[roomID] == nil {
+		user[roomID] = make(map[*websocket.Conn]string)
+	}
+	if score[roomID] == nil {
+		score[roomID] = make(map[*websocket.Conn]int)
+	}
+	score[roomID][conn] = 0
+
+	log.Printf("Client connected to room: %s", roomID)
+
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("Read Error:", err)
 			delete(rooms[roomID], conn)
+			if roomHost[roomID] == conn {
+				delete(roomHost, roomID) // ホストが切断されたら削除
+			}
 			break
 		}
-		if string(msg[:5]) == "score" {
-			if len(msg) >= 8 {
-				scoreValue := (int(msg[5]-'0')*100 + int(msg[6]-'0')*10 + int(msg[7]-'0'))
-				score[roomID] += scoreValue
-				log.Println("score:", score[roomID])
-			}
-			fmt.Println("score:", score[roomID])
-			if(currentGame[roomID] == "fermentationGame") {
-				nextGame(roomID, "millstoneGame")
-				currentGame[roomID] = "millstoneGame"
-			}
+
+		// 送信者のユーザー名を特定
+		userName, exists := user[roomID][conn]
+		if !exists {
+			userName = "UnknownUser"
 		}
-		if string(msg) == "nextGame" {
+
+		// メッセージの処理
+		switch {
+		case string(msg[:5]) == "score":
+			// スコア処理
+			scoreValue := (int(msg[5]-'0')*100 + int(msg[6]-'0')*10 + int(msg[7]-'0'))
+			userName := string(msg[8:])
+			for conn, name := range user[roomID] {
+				if name == userName {
+					score[roomID][conn] += scoreValue
+				}
+			}
+
+		case string(msg[:4]) == "user":
+			// ユーザー名の登録
+			user[roomID][conn] = string(msg[4:])
+			fmt.Println("User:", user[roomID][conn])
+
+		case string(msg) == "nextGame":
 			setupGame(roomID)
+
+		case string(msg) == "gameStart":
+			// 参加者リストを送信
+			userList := ""
+			for _, name := range user[roomID] {
+				userList += name + "|"
+			}
+			sendMessageAll(roomID, []byte("userList|" + userList))
+			setupGame(roomID)
+			sendMessageAll(roomID, []byte("pluckTeaGame"))
+		case string(msg) == "result":
+			// スコアを送信
+			sendMessageAll(roomID, []byte("total score"+fmt.Sprint(score[roomID])))
+			score[roomID] = make(map[*websocket.Conn]int)
+			case string(msg) == "millstoneStart":
+			// ミルストーンゲーム開始
+			sendMessageAll(roomID, []byte("millstoneGame"))
+			currentGame[roomID] = "millstoneGame"
+			setupGame(roomID)
+
+		default:
+			// ユーザー名付きのメッセージをホストに送信
+			formattedMsg := fmt.Sprintf("%s@%s", userName, string(msg))
+			sendMessageHost(roomID, []byte(formattedMsg))
 		}
-		if string(msg) == "result" {
-			sendMessage(roomID, []byte("total score" + fmt.Sprint(score[roomID])))
-			score[roomID] = 0
-		}
-		// ルーム内の全クライアントにメッセージを送信
-		sendMessage(roomID, msg)
 	}
 }
-
-

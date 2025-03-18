@@ -1,5 +1,5 @@
 // MillstoneController.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 type MillstoneControllerProps = {
   motion: { x: number; z: number } | null;
@@ -12,7 +12,7 @@ const MillstoneController = ({
   messages,
   sendMessage,
 }: MillstoneControllerProps) => {
-  const [millstoneAngle, setMillstoneAngle] = useState<number>(0); // 石臼の回転角度
+  const millstoneAngleRef = useRef<number>(0); // 石臼の角度 (θ)
   const [angularVelocity, setAngularVelocity] = useState<number>(0); // 角速度 (ω)
 
   const isStarted = messages.includes("start");
@@ -27,8 +27,8 @@ const MillstoneController = ({
 
       // 石臼の持ち手の角度に基づいて、加速度を回転方向に変換
       const tangentialAcceleration =
-        motion.x * Math.cos(millstoneAngle * (Math.PI / 180)) +
-        motion.z * Math.sin(millstoneAngle * (Math.PI / 180));
+        motion.x * Math.cos(millstoneAngleRef.current * (Math.PI / 180)) +
+        motion.z * Math.sin(millstoneAngleRef.current * (Math.PI / 180));
       // トルク τ = r × F = r × m × a (ここでは単位質量 m=1)
       const torque = tangentialAcceleration;
 
@@ -42,22 +42,25 @@ const MillstoneController = ({
       setAngularVelocity((prev) => prev * friction + angularAcceleration * dt);
 
       // 角度の更新
-      setMillstoneAngle(
-        (prev) => prev + (angularVelocity * dt * 180) / Math.PI
-      );
+      millstoneAngleRef.current =
+        millstoneAngleRef.current + (angularVelocity * dt * 180) / Math.PI;
     }
   }, [motion]);
 
-  // 定期的に millstoneAngle を送信する
+  // 定期的に millstoneAngleRef.current を送信する
   useEffect(() => {
-    if (isFinished) return;
-    if (!isStarted) return;
-    sendMessage(millstoneAngle.toString());
-  }, [millstoneAngle, sendMessage]);
+    if (!isFinished) return;
+    if (isStarted) return;
+    // 0.1秒ごとに角度を送信
+    const interval = setInterval(() => {
+      sendMessage(String(millstoneAngleRef.current));
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div>
-      <h2>回転角度: {Math.round(millstoneAngle)}°</h2>
+      <h2>回転角度: {Math.round(millstoneAngleRef.current)}°</h2>
       <h3>角速度: {angularVelocity.toFixed(2)} rad/s</h3>
     </div>
   );

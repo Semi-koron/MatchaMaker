@@ -11,7 +11,7 @@ const useRoomJoin = (roomId: string) => {
     // WebSocket の URL
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "localhost:8080";
     const protocol = process.env.NEXT_PUBLIC_USE_SSL ? "ws" : "wss";
-    const socket = new WebSocket(`${protocol}://${baseUrl}/room/${roomId}`);
+    const socket = new WebSocket(`${protocol}://${baseUrl}/multroom/${roomId}`);
     socketRef.current = socket;
 
     // 接続成功

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Semikoron/Brachio/backend/solo"
+	"github.com/Semikoron/Brachio/backend/mult"
 	"github.com/gorilla/mux"
 )
 
@@ -19,7 +19,7 @@ func main() {
 	r := mux.NewRouter()
 
 	// ルーム作成用の API
-	r.HandleFunc("/room/{roomID}", solo.HandleWebSocket)
+	r.HandleFunc("/multroom/{roomID}", mult.HandleWebSocket)
 
 	serverAddr := ":8080"
 	fmt.Println("WebSocket server started on", serverAddr)
