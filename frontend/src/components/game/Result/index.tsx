@@ -1,6 +1,7 @@
 import { Button } from "@/components/Button";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import style from "./index.module.css";
 
 type ResultProps = {
@@ -47,6 +48,13 @@ export default function Result({
 
   return (
     <div className={style["result-wrapper"]}>
+      <h2>完成</h2>
+      <Image
+        src="/drink_maccha.png"
+        alt="Matcha drink"
+        width={250}
+        height={250}
+      />
       {score?.map((score, index) => {
         return (
           <div key={index} className={style["score-wrapper"]}>
