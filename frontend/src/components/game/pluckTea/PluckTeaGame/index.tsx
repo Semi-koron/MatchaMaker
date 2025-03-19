@@ -132,22 +132,34 @@ export default function PluckTeaGame({
         <>
           {isFinished ? <h1>終了</h1> : <h1>茶葉を取れ！</h1>}
           {playerName.map((_, index) => (
-            <Image
-              key={index}
-              src="/player.svg"
-              alt="player"
-              width={153}
-              height={130}
-              style={{
-                position: "fixed",
-                top: `${yPleyerPositionRef.current[index]}px`,
-                left: `${xPleyerPositionRef.current[index]}px`,
-                transform:
-                  "translate(-50%, -50%)" +
-                  `rotate(${rotationRef.current[index] + Math.PI / 2}rad)`,
-                zIndex: 10,
-              }}
-            />
+            // プレイヤーの名前を上に表示
+            <div key={index}>
+              <h3
+                style={{
+                  position: "fixed",
+                  top: `${yPleyerPositionRef.current[index] - 80}px`,
+                  left: `${xPleyerPositionRef.current[index]}px`,
+                  transform: "translate(-50%, -50%)",
+                }}
+              >
+                {playerName[index]}
+              </h3>
+              <Image
+                src="/player.svg"
+                alt="player"
+                width={153}
+                height={130}
+                style={{
+                  position: "fixed",
+                  top: `${yPleyerPositionRef.current[index]}px`,
+                  left: `${xPleyerPositionRef.current[index]}px`,
+                  transform:
+                    "translate(-50%, -50%)" +
+                    `rotate(${rotationRef.current[index] + Math.PI / 2}rad)`,
+                  zIndex: 10,
+                }}
+              />
+            </div>
           ))}
           <Image
             src={isDarkmode ? "/tea.svg" : "/tea_dark.svg"}
