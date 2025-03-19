@@ -60,6 +60,9 @@ export default function PluckTeaGame({
         setCount(0);
         break;
       default:
+        if (count !== 0 && messages.includes("start")) {
+          setCount(0);
+        }
         if (lastMessage === "controller connected") {
           return;
         }

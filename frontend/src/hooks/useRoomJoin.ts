@@ -27,7 +27,18 @@ const useRoomJoin = (roomId: string) => {
         // 既に含まれているなら変更しない
         if (prev.includes(event.data)) return prev;
         // 必要なメッセージを維持する
-        const importantMessages = ["controller connected", "start", "finish"];
+        const importantMessages = [
+          "controller connected",
+          "start",
+          "finish",
+          "count3",
+          "count2",
+          "count1",
+          "millstoneGame",
+          "pluckTeaGame",
+          "fermentationGame",
+          "result",
+        ];
         const filteredMessages = importantMessages.filter((msg) =>
           prev.includes(msg)
         );

@@ -53,6 +53,7 @@ export default function ControllerPage() {
           <PluckTeaController
             orientation={orientation}
             sendMessage={sendMessage}
+            messages={messages}
           />
         );
       case "fermentationGame":

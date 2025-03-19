@@ -4,15 +4,21 @@ import { useEffect } from "react";
 type PluckTeaControllerProps = {
   orientation: { gamma: number; beta: number } | null;
   sendMessage: (message: string) => void;
+  messages: string[];
 };
 
 export default function PluckTeaController({
   orientation,
   sendMessage,
+  messages,
 }: PluckTeaControllerProps) {
+  const isFinished = messages.includes("finish");
+  const isStarted = messages.includes("start");
   useEffect(() => {
     const handleOrientation = () => {
-      console.log("handleOrientation");
+      if (isFinished || !isStarted) {
+        return;
+      }
       if (orientation) {
         const stringJson = JSON.stringify({
           dx: orientation.gamma,

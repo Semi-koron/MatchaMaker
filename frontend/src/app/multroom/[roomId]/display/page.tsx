@@ -29,44 +29,41 @@ export default function QRCodePage() {
 
   // メッセージを監視してゲームを切り替える
   useEffect(() => {
-    switch (messages[messages.length - 1]) {
-      case "pluckTeaGame":
-        if (currentGame !== "pluckTeaGame") {
-          clearMessages();
-          setCurrentGame("pluckTeaGame");
-        }
-        break;
-      case "fermentationGame":
-        if (currentGame !== "fermentationGame") {
-          clearMessages();
-          setCurrentGame("fermentationGame");
-          sendMessage("nextGame");
-        }
-        break;
-      case "millstoneGame":
-        if (currentGame !== "millstoneGame") {
-          clearMessages();
-          setCurrentGame("millstoneGame");
-          sendMessage("nextGame");
-        }
-        break;
-      case "resultPage":
-        if (currentGame !== "resultPage") {
-          setCurrentGame("resultPage");
-          clearMessages();
-        }
-      default:
-        // messages[messages.length - 1] が文字列で無い場合
-        if (messages[messages.length - 1] === undefined) return;
-        if (!messages[messages.length - 1]) return;
-        // userListから始まるメッセージの場合
-        if (messages[messages.length - 1].startsWith("userList")) {
-          const userList = messages[messages.length - 1].split("|").slice(1);
-          //最後の要素が空文字列の場合削除
-          if (userList[userList.length - 1] === "") userList.pop();
-          setPlayerName(userList);
-          sendMessage("pluckTeaStart");
-        }
+    const latestMessage = messages[messages.length - 1];
+
+    if (latestMessage === undefined || !latestMessage) return;
+
+    if (
+      latestMessage.includes("pluckTeaGame") &&
+      currentGame !== "pluckTeaGame"
+    ) {
+      clearMessages();
+      setCurrentGame("pluckTeaGame");
+    } else if (
+      latestMessage.includes("fermentationGame") &&
+      currentGame !== "fermentationGame"
+    ) {
+      clearMessages();
+      setCurrentGame("fermentationGame");
+      sendMessage("nextGame");
+    } else if (
+      latestMessage.includes("millstoneGame") &&
+      currentGame !== "millstoneGame"
+    ) {
+      clearMessages();
+      setCurrentGame("millstoneGame");
+      sendMessage("nextGame");
+    } else if (
+      latestMessage.includes("resultPage") &&
+      currentGame !== "resultPage"
+    ) {
+      setCurrentGame("resultPage");
+      clearMessages();
+    } else if (latestMessage.startsWith("userList")) {
+      const userList = latestMessage.split("|").slice(1);
+      if (userList[userList.length - 1] === "") userList.pop();
+      setPlayerName(userList);
+      sendMessage("pluckTeaStart");
     }
   }, [messages, currentGame, clearMessages, sendMessage]); // `messages` の変化を監視
 
