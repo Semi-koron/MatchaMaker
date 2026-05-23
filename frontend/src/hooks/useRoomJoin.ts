@@ -10,7 +10,7 @@ const useRoomJoin = (roomId: string) => {
 
     // WebSocket の URL
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "localhost:8080";
-    const protocol = process.env.NEXT_PUBLIC_USE_SSL ? "ws" : "wss";
+    const protocol = process.env.NEXT_PUBLIC_USE_SSL === "false" ? "ws" : "wss";
     const socket = new WebSocket(`${protocol}://${baseUrl}/multroom/${roomId}`);
     socketRef.current = socket;
 
@@ -40,7 +40,7 @@ const useRoomJoin = (roomId: string) => {
           "result",
         ];
         const filteredMessages = importantMessages.filter((msg) =>
-          prev.includes(msg)
+          prev.includes(msg),
         );
 
         return [...filteredMessages, event.data];
